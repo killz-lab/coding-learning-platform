@@ -35,7 +35,6 @@ backend 2.0/
 
 ## Login Credentials
 - **Students**: Any username where password matches username
-- **Admin**: username `admin`, password `admin277`
 
 ## Backup
 Run `backup.bat` to create timestamped backups of your project.
