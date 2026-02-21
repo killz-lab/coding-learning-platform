@@ -347,6 +347,20 @@ body.dark-theme .admin-control-btn:hover {
     background: #5a67d8;
 }
 
+/* Dark theme for mobile dashboard toggle */
+body.dark-theme .mobile-dashboard-toggle {
+    background: #1f1f1f;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+
+body.dark-theme .dashboard-toggle-btn {
+    color: #9ca3ff;
+}
+
+body.dark-theme .dashboard-toggle-btn:hover {
+    background: rgba(156, 163, 255, 0.1);
+}
+
 .admin-controls {
     background: rgba(102, 126, 234, 0.1);
     padding: 2rem;
@@ -502,6 +516,25 @@ body.dark-theme .theme-btn:hover {
 
 /* Responsive Design - Mobile Friendly */
 @media (max-width: 768px) {
+    .mobile-dashboard-toggle {
+        display: block;
+    }
+    
+    .header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+    }
+    
+    .header.collapsed {
+        transform: translateY(-100%);
+    }
+    
+    .main-content {
+        margin-top: 60px; /* Height of dashboard toggle */
+    }
+    
     .header-content {
         flex-direction: column;
         padding: 1rem;
@@ -577,6 +610,8 @@ body.dark-theme .theme-btn:hover {
     
     .content-area {
         padding: 1rem;
+        overflow-y: visible;
+        min-height: auto;
     }
     
     .stats-grid {
@@ -831,6 +866,37 @@ body.dark-theme .theme-btn:hover {
         width: 35px;
         height: 35px;
     }
+    
+    /* Small mobile admin improvements */
+    .admin-stats {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .admin-stat-card {
+        padding: 0.75rem;
+    }
+    
+    .admin-stat-card i {
+        font-size: 1.2rem;
+    }
+    
+    .admin-stat-card h3 {
+        font-size: 0.7rem;
+    }
+    
+    .admin-stat-card p {
+        font-size: 1rem;
+    }
+    
+    .progress-table table {
+        min-width: 500px;
+        font-size: 0.7rem;
+    }
+    
+    .progress-table th, .progress-table td {
+        padding: 0.5rem 0.3rem;
+    }
 }
 
 /* Modal Styles */
@@ -913,6 +979,38 @@ body.dark-theme .theme-btn:hover {
     border-color: #667eea;
 }
 
+.password-input-container {
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.toggle-password-btn {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #666;
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.toggle-password-btn:hover {
+    color: #667eea;
+}
+
+body.dark-theme .toggle-password-btn {
+    color: #888;
+}
+
+body.dark-theme .toggle-password-btn:hover {
+    color: #9ca3ff;
+}
+
 .login-form button {
     width: 100%;
     padding: 1rem;
@@ -953,6 +1051,53 @@ body.dark-theme .theme-btn:hover {
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
     padding: 1rem 2rem;
     z-index: 100;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.header.collapsed {
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Mobile Dashboard Toggle */
+.mobile-dashboard-toggle {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    z-index: 99;
+    padding: 0.5rem 1rem;
+}
+
+.dashboard-toggle-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #667eea;
+    font-weight: 600;
+}
+
+.dashboard-toggle-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+}
+
+.dashboard-toggle-btn i {
+    font-size: 1.2rem;
+}
+
+.dashboard-toggle-text {
+    font-size: 0.9rem;
 }
 
 .header-content {
@@ -1530,6 +1675,7 @@ body.dark-theme .theme-btn:hover {
 @media (max-width: 768px) {
     .main-content {
         flex-direction: column;
+        overflow: visible;
     }
     
     .sidebar {
@@ -1568,5 +1714,37 @@ body.dark-theme .theme-btn:hover {
     
     .chapters-grid, .challenges-grid {
         grid-template-columns: 1fr;
+    }
+    
+    /* Admin panel mobile improvements */
+    .progress-table {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .progress-table table {
+        min-width: 600px;
+        font-size: 0.8rem;
+    }
+    
+    .admin-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    .admin-stat-card {
+        padding: 1rem;
+    }
+    
+    .admin-stat-card i {
+        font-size: 1.5rem;
+    }
+    
+    .admin-stat-card h3 {
+        font-size: 0.8rem;
+    }
+    
+    .admin-stat-card p {
+        font-size: 1.2rem;
     }
 }

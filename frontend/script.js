@@ -202,6 +202,9 @@ function setupEventListeners() {
     // Theme toggle
     document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     
+    // Password toggle
+    document.getElementById('togglePassword').addEventListener('click', togglePasswordVisibility);
+    
     // User type toggle
     document.querySelectorAll('.user-type-btn').forEach(btn => {
         btn.addEventListener('click', function() {
@@ -245,6 +248,12 @@ function setupEventListeners() {
     
     // Run code button
     document.getElementById('runCode').addEventListener('click', runUserCode);
+    
+    // Dashboard toggle
+    document.getElementById('dashboardToggleBtn').addEventListener('click', toggleDashboard);
+    
+    // Setup swipe gestures for mobile
+    setupSwipeGestures();
 }
 
 function handleLogin(e) {
@@ -650,39 +659,48 @@ function runUserCode() {
 
 function loadAdminData() {
     if (currentUser.type !== 'admin') return;
-    
+        
     // Load all users' progress (simplified - in real app would come from server)
     const allUsers = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
         if (key.startsWith('progress_')) {
             const username = key.replace('progress_', '');
-            const progress = JSON.parse(localStorage.getItem(key));
-            allUsers.push({ username, ...progress });
+            // Skip admin users from student count
+            if (username !== 'admin') {
+                const progress = JSON.parse(localStorage.getItem(key));
+                allUsers.push({ username, ...progress });
+            }
         }
     }
-    
+        
+    console.log('Found students:', allUsers.length); // Debug log
+        
     // Update admin stats
     document.getElementById('totalStudents').textContent = allUsers.length;
-    
+        
     const avgProgress = allUsers.length > 0 
         ? Math.round(allUsers.reduce((sum, user) => sum + (user.chaptersCompleted.length * 5), 0) / allUsers.length)
         : 0;
     document.getElementById('avgProgress').textContent = avgProgress + '%';
-    
+        
     const topPerformer = allUsers.reduce((top, user) => 
         (!top || user.xp > top.xp) ? user : top, null);
     document.getElementById('topPerformer').textContent = topPerformer ? topPerformer.username : '-';
-    
+        
+    // Calculate total XP for all students
+    const totalXPAll = allUsers.reduce((sum, user) => sum + (user.xp || 0), 0);
+    document.getElementById('totalXPAll').textContent = totalXPAll;
+        
     // Update student table
     const tableBody = document.getElementById('studentTableBody');
     tableBody.innerHTML = allUsers.map(user => `
         <tr>
             <td>${user.username}</td>
-            <td>${user.level}</td>
-            <td>${user.xp}</td>
-            <td>${user.chaptersCompleted.length}</td>
-            <td>${user.challengesSolved.length}</td>
+            <td>${user.level || 1}</td>
+            <td>${user.xp || 0}</td>
+            <td>${user.chaptersCompleted ? user.chaptersCompleted.length : 0}</td>
+            <td>${user.challengesSolved ? user.challengesSolved.length : 0}</td>
             <td>${user.lastActive || 'Never'}</td>
         </tr>
     `).join('');
@@ -838,3 +856,95 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// Password Toggle Function
+function togglePasswordVisibility() {
+    const passwordInput = document.getElementById('password');
+    const passwordIcon = document.getElementById('passwordIcon');
+    
+    if (passwordInput.type === 'password') {
+        passwordInput.type = 'text';
+        passwordIcon.className = 'fas fa-eye-slash';
+    } else {
+        passwordInput.type = 'password';
+        passwordIcon.className = 'fas fa-eye';
+    }
+}
+
+// Dashboard Toggle Function
+let isDashboardCollapsed = false;
+
+function toggleDashboard() {
+    const header = document.getElementById('mainHeader');
+    const toggleIcon = document.getElementById('dashboardToggleIcon');
+    const mainContent = document.querySelector('.main-content');
+    
+    isDashboardCollapsed = !isDashboardCollapsed;
+    
+    if (isDashboardCollapsed) {
+        header.classList.add('collapsed');
+        toggleIcon.className = 'fas fa-home';
+        mainContent.style.marginTop = '60px';
+        
+        // Auto-navigate to dashboard section
+        showSection('dashboard');
+    } else {
+        header.classList.remove('collapsed');
+        toggleIcon.className = 'fas fa-chevron-up';
+        mainContent.style.marginTop = '0';
+    }
+}
+
+// Swipe Gesture Setup
+function setupSwipeGestures() {
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let isSwiping = false;
+    
+    const handleTouchStart = (e) => {
+        touchStartY = e.touches[0].clientY;
+        isSwiping = true;
+    };
+    
+    const handleTouchMove = (e) => {
+        if (!isSwiping) return;
+        touchEndY = e.touches[0].clientY;
+    };
+    
+    const handleTouchEnd = () => {
+        if (!isSwiping) return;
+        
+        const swipeDistance = touchEndY - touchStartY;
+        const minSwipeDistance = 50;
+        
+        // Swipe down to show dashboard
+        if (swipeDistance > minSwipeDistance && touchStartY < 100) {
+            if (isDashboardCollapsed) {
+                toggleDashboard();
+            }
+        }
+        
+        isSwiping = false;
+    };
+    
+    // Add touch event listeners
+    document.addEventListener('touchstart', handleTouchStart, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: true });
+    document.addEventListener('touchend', handleTouchEnd, { passive: true });
+}
+
+// Initialize dashboard state on mobile
+function initializeMobileDashboard() {
+    if (window.innerWidth <= 768) {
+        // Start with dashboard collapsed on mobile
+        setTimeout(() => {
+            if (!isDashboardCollapsed) {
+                toggleDashboard();
+            }
+        }, 500);
+    }
+}
+
+// Add mobile dashboard initialization
+window.addEventListener('resize', initializeMobileDashboard);
+initializeMobileDashboard();
