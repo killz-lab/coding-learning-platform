@@ -242,55 +242,25 @@ function setupEventListeners() {
     // Challenge filters
     document.getElementById('difficultyFilter').addEventListener('change', filterChallenges);
     document.getElementById('languageFilter').addEventListener('change', filterChallenges);
+    
     // Run code button
     document.getElementById('runCode').addEventListener('click', runUserCode);
 }
 
 function handleLogin(e) {
     e.preventDefault();
-    const username = document.getElementById('username').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
     const userType = document.querySelector('.user-type-btn.active').dataset.type;
     
-    console.log('Login attempt:', { username, userType, password });
+    console.log('Login attempt:', { username, userType });
     
     // Simple authentication (in real app, this would be server-side)
     if (userType === 'admin' && username === 'admin' && password === 'admin277') {
         currentUser = { username, type: 'admin' };
-        console.log('Admin authenticated successfully');
     } else if (userType === 'student') {
-        // Check if student exists in saved accounts
-        const savedStudents = JSON.parse(localStorage.getItem('studentAccounts') || '{}');
-        
-        if (savedStudents[username]) {
-            // Existing student - verify password
-            if (savedStudents[username].password === password) {
-                currentUser = { username, type: 'student' };
-                console.log('Student authenticated successfully');
-            } else {
-                showNotification('Invalid password for this username', 'error');
-                return;
-            }
-        } else {
-            // New student - create account with username as password
-            if (password === username) {
-                // Save new student account
-                savedStudents[username] = {
-                    password: password,
-                    createdAt: new Date().toISOString()
-                };
-                localStorage.setItem('studentAccounts', JSON.stringify(savedStudents));
-                
-                currentUser = { username, type: 'student' };
-                console.log('New student account created and authenticated');
-                showNotification(`New account created for ${username}!`, 'success');
-            } else {
-                showNotification('For new students, password must match username', 'error');
-                return;
-            }
-        }
+        currentUser = { username, type: 'student' };
     } else {
-        console.log('Authentication failed - invalid credentials');
         showNotification('Invalid credentials', 'error');
         return;
     }
@@ -681,7 +651,7 @@ function runUserCode() {
 function loadAdminData() {
     if (currentUser.type !== 'admin') return;
     
-    // Load all users' progress
+    // Load all users' progress (simplified - in real app would come from server)
     const allUsers = [];
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
@@ -704,11 +674,7 @@ function loadAdminData() {
         (!top || user.xp > top.xp) ? user : top, null);
     document.getElementById('topPerformer').textContent = topPerformer ? topPerformer.username : '-';
     
-    // Calculate total XP earned by all students
-    const totalXPAll = allUsers.reduce((sum, user) => sum + user.xp, 0);
-    document.getElementById('totalXPAll').textContent = totalXPAll;
-    
-    // Update student table with actions
+    // Update student table
     const tableBody = document.getElementById('studentTableBody');
     tableBody.innerHTML = allUsers.map(user => `
         <tr>
@@ -718,10 +684,6 @@ function loadAdminData() {
             <td>${user.chaptersCompleted.length}</td>
             <td>${user.challengesSolved.length}</td>
             <td>${user.lastActive || 'Never'}</td>
-            <td>
-                <button class="admin-control-btn" onclick="resetStudentProgress('${user.username}')">Reset</button>
-                <button class="admin-control-btn" onclick="deleteStudent('${user.username}')">Delete</button>
-            </td>
         </tr>
     `).join('');
 }
@@ -876,223 +838,3 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
-
-// Admin Control Functions
-function resetStudentProgress(username) {
-    if (confirm(`Are you sure you want to reset ${username}'s progress?`)) {
-        localStorage.removeItem(`progress_${username}`);
-        showNotification(`${username}'s progress has been reset`, 'success');
-        loadAdminData(); // Refresh the admin dashboard
-    }
-}
-
-function deleteStudent(username) {
-    if (confirm(`Are you sure you want to delete ${username} and all their data?`)) {
-        // Remove student progress
-        localStorage.removeItem(`progress_${username}`);
-        
-        // Remove student account
-        const savedStudents = JSON.parse(localStorage.getItem('studentAccounts') || '{}');
-        delete savedStudents[username];
-        localStorage.setItem('studentAccounts', JSON.stringify(savedStudents));
-        
-        showNotification(`${username} has been deleted`, 'success');
-        loadAdminData(); // Refresh the admin dashboard
-    }
-}
-
-function resetAllStudentProgress() {
-    if (confirm('Are you sure you want to reset ALL student progress? This cannot be undone!')) {
-        // Remove all progress data except admin
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-            const key = localStorage.key(i);
-            if (key.startsWith('progress_') && !key.includes('admin')) {
-                localStorage.removeItem(key);
-            }
-        }
-        showNotification('All student progress has been reset', 'success');
-        loadAdminData(); // Refresh the admin dashboard
-    }
-}
-
-function exportStudentData() {
-    const allUsers = [];
-    const savedStudents = JSON.parse(localStorage.getItem('studentAccounts') || '{}');
-    
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('progress_')) {
-            const username = key.replace('progress_', '');
-            const progress = JSON.parse(localStorage.getItem(key));
-            
-            // Add account info
-            const accountInfo = savedStudents[username] || {};
-            
-            allUsers.push({ 
-                username, 
-                ...progress,
-                createdAt: accountInfo.createdAt,
-                accountType: 'student'
-            });
-        }
-    }
-    
-    const dataStr = JSON.stringify(allUsers, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `student_data_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
-    showNotification('Student data exported successfully', 'success');
-}
-
-function clearAllStudentData() {
-    if (confirm('Are you sure you want to clear ALL student data? This will delete everything except your admin data! This cannot be undone!')) {
-        // Remove all progress data except admin
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-            const key = localStorage.key(i);
-            if (key.startsWith('progress_') && !key.includes('admin')) {
-                localStorage.removeItem(key);
-            }
-        }
-        
-        // Remove all student accounts
-        localStorage.removeItem('studentAccounts');
-        
-        showNotification('All student data has been cleared', 'success');
-        loadAdminData(); // Refresh the admin dashboard
-    }
-}
-
-// Owner Functions
-function loadOwnerData() {
-    if (currentUser.type !== 'owner') return;
-    
-    // Load all users' progress
-    const allUsers = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('progress_')) {
-            const username = key.replace('progress_', '');
-            const progress = JSON.parse(localStorage.getItem(key));
-            allUsers.push({ username, ...progress });
-        }
-    }
-    
-    // Update owner stats
-    document.getElementById('ownerTotalStudents').textContent = allUsers.length;
-    
-    const avgProgress = allUsers.length > 0 
-        ? Math.round(allUsers.reduce((sum, user) => sum + (user.chaptersCompleted.length * 5), 0) / allUsers.length)
-        : 0;
-    document.getElementById('ownerAvgProgress').textContent = avgProgress + '%';
-    
-    const topPerformer = allUsers.reduce((top, user) => 
-        (!top || user.xp > top.xp) ? user : top, null);
-    document.getElementById('ownerTopPerformer').textContent = topPerformer ? topPerformer.username : '-';
-    
-    // Count admins (simplified - in real app would track admin users separately)
-    const adminCount = 1; // At least the admin user exists
-    document.getElementById('totalAdmins').textContent = adminCount;
-    
-    // Update student table with actions
-    const tableBody = document.getElementById('ownerStudentTableBody');
-    tableBody.innerHTML = allUsers.map(user => `
-        <tr>
-            <td>${user.username}</td>
-            <td>${user.level}</td>
-            <td>${user.xp}</td>
-            <td>${user.chaptersCompleted.length}</td>
-            <td>${user.challengesSolved.length}</td>
-            <td>${user.lastActive || 'Never'}</td>
-            <td>
-                <button class="owner-btn" onclick="resetStudentProgress('${user.username}')">Reset</button>
-                <button class="owner-btn" onclick="deleteStudent('${user.username}')">Delete</button>
-            </td>
-        </tr>
-    `).join('');
-}
-
-function resetStudentProgress(username) {
-    if (confirm(`Are you sure you want to reset ${username}'s progress?`)) {
-        localStorage.removeItem(`progress_${username}`);
-        showNotification(`${username}'s progress has been reset`, 'success');
-        loadOwnerData(); // Refresh the owner dashboard
-    }
-}
-
-function deleteStudent(username) {
-    if (confirm(`Are you sure you want to delete ${username} and all their data?`)) {
-        localStorage.removeItem(`progress_${username}`);
-        showNotification(`${username} has been deleted`, 'success');
-        loadOwnerData(); // Refresh the owner dashboard
-    }
-}
-
-function resetAllProgress() {
-    if (confirm('Are you sure you want to reset ALL student progress? This cannot be undone!')) {
-        // Remove all progress data except admin/owner
-        for (let i = localStorage.length - 1; i >= 0; i--) {
-            const key = localStorage.key(i);
-            if (key.startsWith('progress_') && 
-                !key.includes('admin') && 
-                !key.includes('syntax')) {
-                localStorage.removeItem(key);
-            }
-        }
-        showNotification('All student progress has been reset', 'success');
-        loadOwnerData(); // Refresh the owner dashboard
-    }
-}
-
-function exportStudentData() {
-    const allUsers = [];
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        if (key.startsWith('progress_')) {
-            const username = key.replace('progress_', '');
-            const progress = JSON.parse(localStorage.getItem(key));
-            allUsers.push({ username, ...progress });
-        }
-    }
-    
-    const dataStr = JSON.stringify(allUsers, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `student_data_${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
-    showNotification('Student data exported successfully', 'success');
-}
-
-function clearAllData() {
-    if (confirm('Are you sure you want to clear ALL data? This will delete everything including admin and owner data! This cannot be undone!')) {
-        localStorage.clear();
-        showNotification('All data has been cleared', 'success');
-        // Redirect to login
-        location.reload();
-    }
-}
-
-// Check for owner access on page load
-function checkOwnerAccess() {
-    const ownerAccess = localStorage.getItem('ownerAccess');
-    if (ownerAccess === 'enabled') {
-        document.body.classList.add('owner-access');
-        // Show owner button
-        document.querySelectorAll('.owner-btn').forEach(btn => {
-            btn.style.display = 'inline-block';
-        });
-    }
-}
-
-// Initialize owner access check
-checkOwnerAccess();
