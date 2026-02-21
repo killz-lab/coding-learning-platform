@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coding Learning Server - Learn to Code</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal active">
+        <div class="modal-content">
+            <h2>Welcome to Coding Learning Server</h2>
+            <div class="login-form">
+                <div class="user-type-toggle">
+                    <button class="user-type-btn active" data-type="student">Student</button>
+                    <button class="user-type-btn" data-type="admin">Admin</button>
+                </div>
+                <form id="loginForm">
+                    <input type="text" id="username" placeholder="Username" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <button type="submit">Login</button>
+                </form>
+                <p class="login-hint">Students: Choose any username and use the same password to create your account. Your progress will be saved!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="hidden">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-code"></i>
+                    <span>Coding Learning Server</span>
+                </div>
+                <div class="user-info">
+                    <div class="theme-toggle">
+                        <button id="themeToggle" class="theme-btn">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </button>
+                    </div>
+                    <div class="xp-container">
+                        <span class="xp-label">Level <span id="userLevel">1</span></span>
+                        <div class="xp-bar">
+                            <div class="xp-progress" id="xpProgress"></div>
+                        </div>
+                        <span class="xp-text"><span id="currentXP">0</span>/<span id="maxXP">100</span> XP</span>
+                    </div>
+                    <div class="user-details">
+                        <span id="usernameDisplay">Student</span>
+                        <button id="logoutBtn" class="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="nav-menu">
+                    <ul>
+                        <li><a href="#" class="nav-link active" data-section="dashboard">
+                            <i class="fas fa-home"></i> Dashboard
+                        </a></li>
+                        <li><a href="#" class="nav-link" data-section="chapters">
+                            <i class="fas fa-book"></i> Chapters
+                        </a></li>
+                        <li><a href="#" class="nav-link" data-section="challenges">
+                            <i class="fas fa-puzzle-piece"></i> Code Challenges
+                        </a></li>
+                        <li><a href="#" class="nav-link" data-section="debug">
+                            <i class="fas fa-bug"></i> Debug Code
+                        </a></li>
+                        <li id="adminNavItem" class="hidden"><a href="#" class="nav-link" data-section="admin">
+                            <i class="fas fa-users-cog"></i> Admin Panel
+                        </a></li>
+                    </ul>
+                </nav>
+                <div class="discord-section">
+                    <a href="https://discord.gg/8CxFs6Ngbm" target="_blank" class="discord-btn">
+                        <i class="fab fa-discord"></i> Join Discord
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Content Area -->
+            <section class="content-area">
+                <!-- Dashboard Section -->
+                <div id="dashboard" class="section active">
+                    <h1>Welcome to Your Learning Journey!</h1>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-trophy"></i>
+                            <h3>Total XP</h3>
+                            <p id="totalXP">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-book-open"></i>
+                            <h3>Chapters Completed</h3>
+                            <p id="chaptersCompleted">0/20</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-check-circle"></i>
+                            <h3>Challenges Solved</h3>
+                            <p id="challengesSolved">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-fire"></i>
+                            <h3>Current Streak</h3>
+                            <p id="currentStreak">0 days</p>
+                        </div>
+                    </div>
+                    <div class="quick-actions">
+                        <h2>Quick Start</h2>
+                        <div class="action-cards">
+                            <div class="action-card" data-action="start-chapter">
+                                <i class="fas fa-play"></i>
+                                <h3>Start Learning</h3>
+                                <p>Begin your coding journey</p>
+                            </div>
+                            <div class="action-card" data-action="practice-challenge">
+                                <i class="fas fa-code"></i>
+                                <h3>Practice Challenge</h3>
+                                <p>Test your skills</p>
+                            </div>
+                            <div class="action-card" data-action="debug-code">
+                                <i class="fas fa-bug"></i>
+                                <h3>Debug Code</h3>
+                                <p>Fix broken code</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chapters Section -->
+                <div id="chapters" class="section">
+                    <h1>Learning Chapters</h1>
+                    <div class="language-tabs">
+                        <button class="lang-tab active" data-lang="javascript">JavaScript</button>
+                        <button class="lang-tab" data-lang="html">HTML</button>
+                        <button class="lang-tab" data-lang="css">CSS</button>
+                        <button class="lang-tab" data-lang="csharp">C#</button>
+                        <button class="lang-tab" data-lang="cpp">C++</button>
+                    </div>
+                    <div class="chapters-grid" id="chaptersGrid">
+                        <!-- Chapters will be dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- Code Challenges Section -->
+                <div id="challenges" class="section">
+                    <h1>Code Challenges</h1>
+                    <div class="challenge-filters">
+                        <select id="difficultyFilter">
+                            <option value="all">All Difficulties</option>
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                        <select id="languageFilter">
+                            <option value="all">All Languages</option>
+                            <option value="javascript">JavaScript</option>
+                            <option value="html">HTML</option>
+                            <option value="css">CSS</option>
+                            <option value="csharp">C#</option>
+                            <option value="cpp">C++</option>
+                        </select>
+                    </div>
+                    <div class="challenges-grid" id="challengesGrid">
+                        <!-- Challenges will be dynamically loaded here -->
+                    </div>
+                </div>
+
+                <!-- Debug Section -->
+                <div id="debug" class="section">
+                    <h1>Debug Broken Code</h1>
+                    <div class="debug-container">
+                        <div class="debug-problem">
+                            <h3>Problem Statement</h3>
+                            <p id="problemStatement">Find and fix the errors in the code below</p>
+                        </div>
+                        <div class="code-editor">
+                            <div class="editor-header">
+                                <span>Code Editor</span>
+                                <button id="runCode" class="run-btn">
+                                    <i class="fas fa-play"></i> Run Code
+                                </button>
+                            </div>
+                            <textarea id="codeInput" placeholder="Write your code here..."></textarea>
+                        </div>
+                        <div class="output-panel">
+                            <h3>Output</h3>
+                            <div id="outputDisplay"></div>
+                        </div>
+                        <div class="feedback-panel">
+                            <h3>Feedback</h3>
+                            <div id="feedbackDisplay"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Section -->
+                <div id="admin" class="section">
+                    <h1>🛡️ Admin Dashboard</h1>
+                    <div class="admin-stats">
+                        <div class="admin-stat-card">
+                            <i class="fas fa-users"></i>
+                            <h3>Total Students</h3>
+                            <p id="totalStudents">0</p>
+                        </div>
+                        <div class="admin-stat-card">
+                            <i class="fas fa-chart-line"></i>
+                            <h3>Average Progress</h3>
+                            <p id="avgProgress">0%</p>
+                        </div>
+                        <div class="admin-stat-card">
+                            <i class="fas fa-star"></i>
+                            <h3>Top Performer</h3>
+                            <p id="topPerformer">-</p>
+                        </div>
+                        <div class="admin-stat-card">
+                            <i class="fas fa-trophy"></i>
+                            <h3>Total XP Earned</h3>
+                            <p id="totalXPAll">0</p>
+                        </div>
+                    </div>
+                    <div class="student-progress">
+                        <h2>Student Progress & Management</h2>
+                        <div class="progress-table">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Student</th>
+                                        <th>Level</th>
+                                        <th>Total XP</th>
+                                        <th>Chapters Completed</th>
+                                        <th>Challenges Solved</th>
+                                        <th>Last Active</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="studentTableBody">
+                                    <!-- Student data will be loaded here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="admin-controls">
+                        <h2>Admin Controls</h2>
+                        <div class="control-buttons">
+                            <button class="admin-control-btn" onclick="resetAllStudentProgress()">🔄 Reset All Progress</button>
+                            <button class="admin-control-btn" onclick="exportStudentData()">📊 Export Student Data</button>
+                            <button class="admin-control-btn" onclick="clearAllStudentData()">🗑️ Clear All Student Data</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
